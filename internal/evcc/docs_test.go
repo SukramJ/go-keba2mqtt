@@ -4,6 +4,7 @@
 package evcc
 
 import (
+	"bytes"
 	"os"
 	"regexp"
 	"slices"
@@ -25,6 +26,8 @@ func TestDocsSnippetMatchesTheProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// A Windows checkout may carry CRLF line endings.
+	md = bytes.ReplaceAll(md, []byte("\r\n"), []byte("\n"))
 	blocks := regexp.MustCompile("(?s)```yaml\n(.*?)```").FindAllSubmatch(md, -1)
 	if len(blocks) != 1 {
 		t.Fatalf("docs/evcc.md has %d yaml blocks, want 1", len(blocks))
