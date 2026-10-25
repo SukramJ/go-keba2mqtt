@@ -1,0 +1,70 @@
+# go-keba2mqtt configuration
+#
+# Every key can be overridden by an environment variable with the KEBA_
+# prefix (KEBA_MODBUS_IP, KEBA_MQTT_PASSWORD, ...). Without a config file
+# the daemon runs from environment variables and defaults alone.
+#
+# Search order: --config, ./config.yaml, $XDG_CONFIG_HOME/keba2mqtt/config.yaml
+# (%APPDATA%\keba2mqtt\config.yaml on Windows), ~/.config/keba2mqtt/config.yaml.
+
+# --- KEBA KeContact P40 (Modbus TCP) ---------------------------------------
+# Modbus TCP must be enabled on the wallbox first (KEBA eMobility App or
+# OCPP); it is off by default. The P40 expects ONE Modbus client: do not
+# let an EMS (or evcc) talk Modbus to it in parallel — use this bridge's
+# MQTT topics instead.
+MODBUS_IP: 0.0.0.0 # IP address / hostname of the wallbox
+MODBUS_PORT: 502 # Modbus TCP port (configurable on the wallbox, default 502)
+MODBUS_UNIT_ID: 255 # Unit ID (configurable on the wallbox, default 255)
+MODBUS_TIMEOUT: 5 # Timeout of one request (s)
+# MODBUS_READ_INTERVAL: 500   # Minimum spacing between two requests (ms); the P40 asks for 500
+# MODBUS_WRITE_INTERVAL: 5    # Minimum spacing between two writes (s); the P40 asks for 5
+
+# --- MQTT --------------------------------------------------------------------
+MQTT_SERVER: localhost # MQTT broker
+MQTT_PORT: 1883 # Broker port (default 1883 plain, 8883 with MQTT_SSL)
+MQTT_LOGIN: "" # (override: env KEBA_MQTT_LOGIN)
+MQTT_PASSWORD: "" # (override: env KEBA_MQTT_PASSWORD)
+MQTT_TOPIC: keba # Instance name, the first level of every topic.
+#                  Two wallboxes = two instances = two names.
+# MQTT_MAINTENANCE: true     # <name>/maintenance/set/loglevel, .../set/restart and
+#                            # <name>/maintenance/stats. Anyone who may publish on the
+#                            # broker can use them; secure the broker or set false.
+# MQTT_STATS_INTERVAL: 60    # Seconds between <name>/maintenance/stats; 0 = off
+# MQTT_SSL: false            # Connect via TLS (tls://)
+# MQTT_SSL_INSECURE: false   # DANGEROUS: skip broker certificate verification
+
+# --- Polling (s) ---------------------------------------------------------------
+# One register per request, at most one request per 0.5 s: the "now" group
+# (~17 registers) takes ~9 s to read, so faster than 10 s gains nothing.
+# REFRESH_NOW: 10            # state, measurements, current limit, phases
+# REFRESH_CONFIG: 60         # phase switching source, failsafe settings
+# REFRESH_STATIC: 3600       # serial, product, firmware, hardware revisions
+
+# --- Home Assistant ------------------------------------------------------------
+HASS_ENABLE: false # Publish the MQTT discovery document
+HASS_BASE_TOPIC: homeassistant # Home Assistant's discovery prefix
+HASS_BIRTH_GRACETIME: 15 # Seconds to give a starting Home Assistant before discovery
+# DEVICE_NAME: ""            # Device name and entity_id seed, e.g. "Garage" →
+#                            # sensor.garage_power. Default "KEBA KeContact P40" / "keba".
+
+# --- Features ------------------------------------------------------------------
+# RFID_ENABLE: false         # Publish the UID of the RFID card that authorised the
+#                            # session (register 1500). Personal data; reading it over
+#                            # Modbus must also be enabled on the wallbox.
+# EVCC_ENABLE: false         # Publish the shared evcc profile under
+#                            # <name>/status/<serial>/evcc/... and accept its commands.
+#                            # See docs/evcc.md.
+# FAILSAFE_KEEPALIVE: 0      # Re-write the last commanded charging current every N
+#                            # seconds (0 = off) so the wallbox's EMS failsafe only
+#                            # engages when commands really stop. Must be shorter than
+#                            # the failsafe timeout set on the wallbox.
+
+# --- Web UI --------------------------------------------------------------------
+WEB_ENABLE: false # Embedded diagnostic web UI
+WEB_BIND: 127.0.0.1:8080 # Listen address (0.0.0.0:8080 for LAN access)
+WEB_USER: "" # HTTP basic auth (both empty = no auth)
+WEB_PASSWORD: "" # (override: env KEBA_WEB_PASSWORD)
+
+# --- General -------------------------------------------------------------------
+LANGUAGE: en # Display language of Home Assistant names and the web UI: en, de
+DEBUG: false # Verbose logging

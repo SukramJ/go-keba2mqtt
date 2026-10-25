@@ -1,0 +1,119 @@
+# GitHub Actions CI for go-keba2mqtt.
+#
+# Four jobs: lint (gofumpt + go vet), test (matrix across the OS
+# triplet the daemon supports — race detector on, so CGo enabled for
+# this single step), build (sanity-check that the binary produces a
+# version banner), audit (govulncheck + go-licenses, so `make vuln` /
+# `make licenses` actually run somewhere instead of only locally).
+# Concurrency cancels stale runs on the same ref so a fast-pushing
+# developer isn't billed for outdated commits.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CGO_ENABLED: "0"
+  GO_VERSION: "1.27.3"
+  # The tools below are pinned, not @latest. Dependabot tracks go.mod
+  # requires, not go-install lines in a workflow, so these are bumped by
+  # hand — deliberately: raise the version, run `make check`, and fix or
+  # justify whatever the new release finds in the same change. Floating on
+  # @latest makes these gates report on the calendar rather than on the
+  # diff, and turns an unrelated upstream release into a red CI on someone
+  # else's PR. gofumpt is the sharpest case: it is a formatter, so a new
+  # release rewraps untouched code and reds main overnight. Keep these in
+  # step with the versions `make setup` installs.
+  GOFUMPT_VERSION: "v0.12.0"
+  # Pinning govulncheck and go-licenses does not freeze the answer they
+  # give: govulncheck resolves the vulnerability database at run time and
+  # go-licenses classifies whatever a dependency actually ships, so a newly
+  # published advisory or a relicensed dependency still turns the audit job
+  # red without a commit here — which is the point. The pin only removes
+  # the other source of red: a tool release changing its own reachability
+  # analysis or license classifier under an unrelated PR.
+  GOVULNCHECK_VERSION: "v1.8.0"
+  GOLICENSES_VERSION: "v1.6.0"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: go vet
+        run: go vet ./...
+      - name: gofumpt
+        run: |
+          go install mvdan.cc/gofumpt@${{ env.GOFUMPT_VERSION }}
+          diff=$(gofumpt -l .)
+          if [ -n "$diff" ]; then
+            echo "::error::gofumpt would rewrite:"
+            echo "$diff"
+            exit 1
+          fi
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: go test
+        env:
+          # Race detector requires CGo; re-enable just for this step.
+          CGO_ENABLED: "1"
+        run: go test -race -count=1 -timeout=120s ./...
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: build daemon + util
+        run: make build
+      - name: version banner
+        run: ./bin/keba2mqtt --version
+
+  audit:
+    name: audit (vuln + licenses)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: install govulncheck + go-licenses
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@${{ env.GOVULNCHECK_VERSION }}
+          go install github.com/google/go-licenses@${{ env.GOLICENSES_VERSION }}
+      - name: govulncheck
+        run: make vuln
+      - name: license check
+        run: make licenses

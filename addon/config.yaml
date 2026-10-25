@@ -1,0 +1,87 @@
+# Home Assistant add-on manifest for go-keba2mqtt.
+#
+# version MUST equal the published image tag (ghcr.io/sukramj/go-keba2mqtt-addon-{arch})
+# and is bumped in the release commit that cuts the matching git tag.
+name: go-keba2mqtt
+version: "0.1.0"
+slug: go-keba2mqtt
+description: >-
+  Bridges a KEBA KeContact P40 / P40 Pro wallbox to MQTT over Modbus TCP,
+  with Home Assistant MQTT discovery, an evcc profile and a diagnostic web UI.
+url: https://github.com/SukramJ/go-keba2mqtt
+arch:
+  - amd64
+  - aarch64
+  - armv7
+
+# Per-arch add-on image (HA base + bashio + run.sh) published by
+# .github/workflows/addon-image.yml. The Supervisor substitutes {arch}
+# (amd64/aarch64/armv7) and pulls <image>:<version>. This is distinct from the
+# distroless daemon image (ghcr.io/sukramj/go-keba2mqtt), which runs the binary
+# directly and is NOT a valid add-on image (no run.sh to apply options).
+# Remove this key to build addon/Dockerfile locally instead.
+image: "ghcr.io/sukramj/go-keba2mqtt-addon-{arch}"
+
+# The HA base image ships s6-overlay as its init; don't let the Supervisor
+# inject its own init on top.
+init: false
+
+# Diagnostic web UI surfaced as an HA panel via Ingress — no port needs to be
+# exposed.
+ingress: true
+ingress_port: 8080
+panel_icon: mdi:ev-station
+panel_title: go-keba2mqtt
+
+# Optional host-port exposure (disabled by default — `null` publishes no port,
+# Ingress stays the primary path).
+ports:
+  8080/tcp: null
+ports_description:
+  8080/tcp: "Diagnostic web UI (normally reached via Ingress)"
+
+# Soft dependency: use the Supervisor's MQTT broker (core-mosquitto) when present.
+services:
+  - mqtt:want
+
+options:
+  modbus_ip: "0.0.0.0"
+  modbus_port: 502
+  modbus_unit_id: 255
+  modbus_timeout: 5
+  mqtt_server: ""
+  mqtt_port: 1883
+  mqtt_login: ""
+  mqtt_password: ""
+  mqtt_topic: keba
+  mqtt_maintenance: true
+  mqtt_stats_interval: 60
+  hass_enable: true
+  device_name: ""
+  rfid_enable: false
+  evcc_enable: false
+  failsafe_keepalive: 0
+  language: en
+  web_enable: true
+  debug: false
+
+schema:
+  modbus_ip: str
+  modbus_port: int(1,65535)
+  modbus_unit_id: int(0,255)
+  modbus_timeout: int(1,600)
+  mqtt_server: "str?"
+  mqtt_port: int(1,65535)
+  mqtt_login: "str?"
+  mqtt_password: "password?"
+  mqtt_topic: str
+  mqtt_maintenance: bool
+  mqtt_stats_interval: int(0,86400)
+  hass_enable: bool
+  device_name: "str?"
+  rfid_enable: bool
+  evcc_enable: bool
+  failsafe_keepalive: int(0,600)
+  language: "list(en|de)"
+  web_enable: bool
+  debug: bool
