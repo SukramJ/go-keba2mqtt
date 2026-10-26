@@ -21,7 +21,7 @@ MODBUS_TIMEOUT: 5 # Timeout of one request (s)
 
 # --- MQTT --------------------------------------------------------------------
 MQTT_SERVER: localhost # MQTT broker
-MQTT_PORT: 1883 # Broker port (default 1883 plain, 8883 with MQTT_SSL)
+MQTT_PORT: 1883 # Broker port (default 1883 plain, 8883 with MQTT_TLS)
 MQTT_LOGIN: "" # (override: env KEBA_MQTT_LOGIN)
 MQTT_PASSWORD: "" # (override: env KEBA_MQTT_PASSWORD)
 MQTT_TOPIC: keba # Instance name, the first level of every topic.
@@ -30,8 +30,14 @@ MQTT_TOPIC: keba # Instance name, the first level of every topic.
 #                            # <name>/maintenance/stats. Anyone who may publish on the
 #                            # broker can use them; secure the broker or set false.
 # MQTT_STATS_INTERVAL: 60    # Seconds between <name>/maintenance/stats; 0 = off
-# MQTT_SSL: false            # Connect via TLS (tls://)
-# MQTT_SSL_INSECURE: false   # DANGEROUS: skip broker certificate verification
+# MQTT_TLS: false            # Connect via TLS (tls://)
+# MQTT_TLS_CA: ""            # PEM CA bundle to verify the broker against
+#                             # (replaces the system roots) — for a broker
+#                             # whose certificate your own CA issued
+# MQTT_TLS_INSECURE: false   # DANGEROUS: skip broker certificate verification;
+#                             # prefer MQTT_TLS_CA, not together with it
+# (MQTT_SSL / MQTT_SSL_INSECURE were renamed to MQTT_TLS / MQTT_TLS_INSECURE;
+#  a configuration that still sets them is refused.)
 
 # --- Polling (s) ---------------------------------------------------------------
 # One register per request, at most one request per 0.5 s: the "now" group

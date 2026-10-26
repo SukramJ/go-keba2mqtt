@@ -66,7 +66,7 @@ func applyDefaults(c *Config, raw map[string]any) {
 	}
 	if !rawHasKey(raw, "MQTT_PORT") {
 		c.MQTTPort = DefaultMQTTPort
-		if c.MQTTSSL {
+		if c.MQTTTLS {
 			c.MQTTPort = mqttDefaultTLSPort
 		}
 	}

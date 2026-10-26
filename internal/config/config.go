@@ -9,8 +9,11 @@
 package config
 
 import (
+	"crypto/tls"
 	"fmt"
 	"time"
+
+	"github.com/SukramJ/go-mqtt"
 )
 
 // Daemon-wide constants.
@@ -53,11 +56,17 @@ type Config struct {
 	// MQTTStatsInterval is the period of `<name>/maintenance/stats` in
 	// seconds; 0 switches it off.
 	MQTTStatsInterval int `yaml:"MQTT_STATS_INTERVAL"`
-	// MQTTSSL dials tls:// instead of tcp://.
-	MQTTSSL bool `yaml:"MQTT_SSL"`
-	// MQTTSSLInsecure disables broker certificate verification. A
-	// dangerous opt-in for self-signed certificates only.
-	MQTTSSLInsecure bool `yaml:"MQTT_SSL_INSECURE"`
+	// MQTTTLS dials tls:// instead of tcp:// (default port 8883).
+	// Releases up to 0.2.0 called it MQTT_SSL; see [renamedKeys].
+	MQTTTLS bool `yaml:"MQTT_TLS"`
+	// MQTTTLSInsecure disables broker certificate verification. A
+	// dangerous, explicit opt-in, never a default; prefer MQTTTLSCA. The
+	// two are mutually exclusive.
+	MQTTTLSInsecure bool `yaml:"MQTT_TLS_INSECURE"`
+	// MQTTTLSCA is the path of a PEM CA bundle the broker certificate is
+	// verified against instead of the system roots — for a broker whose
+	// certificate a private CA issued. Empty uses the system roots.
+	MQTTTLSCA string `yaml:"MQTT_TLS_CA"`
 
 	// --- Home Assistant ---
 	HASSEnable         bool   `yaml:"HASS_ENABLE"`
@@ -99,6 +108,47 @@ type Config struct {
 	Debug    bool   `yaml:"DEBUG"`
 }
 
+// renamedKeys were renamed after 0.2.0, old key → new key. A
+// configuration that still sets one is REFUSED rather than ignored: an
+// ignored MQTT_SSL: true would fall back to plain TCP — credentials in
+// clear text — without anyone noticing.
+var renamedKeys = [][2]string{
+	{"MQTT_SSL", "MQTT_TLS"},
+	{"MQTT_SSL_INSECURE", "MQTT_TLS_INSECURE"},
+}
+
+// IgnoredTLSKeys returns the TLS-only keys set while MQTT_TLS is off,
+// where they have no effect. The daemon warns about each.
+func (c *Config) IgnoredTLSKeys() []string {
+	if c.MQTTTLS {
+		return nil
+	}
+	var keys []string
+	if c.MQTTTLSInsecure {
+		keys = append(keys, "MQTT_TLS_INSECURE")
+	}
+	if c.MQTTTLSCA != "" {
+		keys = append(keys, "MQTT_TLS_CA")
+	}
+	return keys
+}
+
+// MQTTTLSConfig builds the tls.Config for the broker connection, or nil
+// when MQTT_TLS is off. The server name is MQTT_SERVER, the bare broker
+// host (also the host part of [Config.MQTTBrokerURL]). An unusable
+// MQTT_TLS_CA is an error naming the file, so the daemon stops at
+// start-up instead of failing every handshake later.
+func (c *Config) MQTTTLSConfig() (*tls.Config, error) {
+	if !c.MQTTTLS {
+		return nil, nil //nolint:nilnil // nil config = plain TCP, not an error
+	}
+	tlsConfig, err := mqtt.NewClientTLSConfigWithCA(c.MQTTServer, c.MQTTTLSCA, c.MQTTTLSInsecure)
+	if err != nil {
+		return nil, fmt.Errorf("config: MQTT_TLS_CA: %w", err)
+	}
+	return tlsConfig, nil
+}
+
 const (
 	mqttDefaultPlainPort = 1883
 	mqttDefaultTLSPort   = 8883
@@ -109,7 +159,7 @@ const (
 func (c *Config) MQTTBrokerURL() string {
 	scheme := "tcp"
 	defaultPort := mqttDefaultPlainPort
-	if c.MQTTSSL {
+	if c.MQTTTLS {
 		scheme = "tls"
 		defaultPort = mqttDefaultTLSPort
 	}
