@@ -33,7 +33,8 @@ transport with go-mtec2mqtt through `github.com/SukramJ/go-modbus`.
 - **Dependencies are deliberately minimal**: `github.com/SukramJ/go-modbus`
   (Modbus-TCP client), `github.com/SukramJ/go-mqtt` (MQTT 5 client),
   `github.com/SukramJ/go-hamqtt` (discovery model + publisher runtime),
-  `github.com/SukramJ/go-ha-catalog` (HA vocabulary), `golang.org/x/sync`,
+  `github.com/SukramJ/go-ha-catalog` (HA vocabulary),
+  `github.com/SukramJ/go-bridgeui` (the shared web dashboard), `golang.org/x/sync`,
   `gopkg.in/yaml.v3`. All SukramJ modules are pinned to exact versions.
 - **Config**: YAML (`config-template.yaml` is the annotated reference),
   overridable per key via `KEBA_<KEY>` env vars. Loaded from `--config`,
@@ -75,7 +76,7 @@ internal/hass/         topic functions (StateTopic, CommandTopic, CommandFilter,
 internal/coordinator/  boot (static read, discovery), poll scheduler, write queue (coalescing, idempotent), evcc commands, keepalive, availability, web backend
 internal/config/       YAML loader + KEBA_* env overlay + defaults + validation
 internal/state/        thread-safe live-value cache for the web UI
-internal/web/          diagnostic web UI / HA Ingress panel (embedded static assets, no build step)
+internal/web/          go-bridgeui adapter: the coordinator's state as the shared dashboard's contract, page layout + labels (i18n/)
 internal/version/      build info (Version/Commit/BuildDate via ldflags)
 addon/                 Home Assistant add-on (manifest, Dockerfile, DOCS.md, CHANGELOG.md)
 docs/evcc.md           evcc integration incl. the evcc.yaml snippet (checked by internal/evcc/docs_test.go)
