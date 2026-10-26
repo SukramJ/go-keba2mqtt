@@ -410,8 +410,9 @@ func TestFailsafeKeepalive(t *testing.T) {
 		t.Fatalf("keepalive wrote %v before any command", w)
 	}
 	f.set("now", keba.KeyChargingCurrent, "8")
-	f.waitWrites(t, modbustest.Write{Address: 5004, Value: 8000})
-	eventually(t, "keepalive rewrite", func() bool { return len(f.bank.Writes()) >= 2 })
+	// Not waitWrites: the keepalive may already have added its rewrite by
+	// the time the command's write is seen, on a slow runner.
+	eventually(t, "command and keepalive rewrite", func() bool { return len(f.bank.Writes()) >= 2 })
 	for _, w := range f.bank.Writes() {
 		if w != (modbustest.Write{Address: 5004, Value: 8000}) {
 			t.Fatalf("keepalive wrote %v", w)

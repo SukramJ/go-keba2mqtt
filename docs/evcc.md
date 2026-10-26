@@ -82,7 +82,6 @@ chargers:
       source: mqtt
       topic: keba/status/18416854/evcc/power
       jq: .val
-      timeout: 60s
     energy:
       source: mqtt
       topic: keba/status/18416854/evcc/energy
@@ -125,11 +124,11 @@ Leave out `phases1p3p` if your P40 has no phase switching (product feature
 
 ## Freshness and failure
 
-- `timeout` on `power` makes evcc treat the charger as unavailable when no
-  new value arrives — the bridge polls every `REFRESH_NOW` (10 s) and
-  publishes a value only when it changes, so keep the timeout generous or
-  rely on availability: `keba/connected` is `2` while the bridge reaches the
-  wallbox, `1` when it does not, `0` when the bridge is down.
+- The snippet sets no `timeout`: the bridge publishes a value only when it
+  changes, so a steady value (no vehicle, 0 W for hours) would look outdated
+  to evcc and fail the charger. Availability is `keba/connected` instead:
+  `2` while the bridge reaches the wallbox, `1` when it does not, `0` when
+  the bridge is down.
 - The wallbox's **EMS failsafe** (registers 1600/1602, *Failsafe current* and
   *Failsafe timeout* in Home Assistant) applies a fallback current when no
   Modbus command arrives within the timeout. evcc sends nothing while its
@@ -140,10 +139,12 @@ Leave out `phases1p3p` if your P40 has no phase switching (product feature
 
 ## The shared profile
 
-The same contract holds for all three bridges (go-mtec2mqtt#75,
-go-zendure2mqtt#66): the `evcc` item group, evcc's units and signs (power
-positive = import / production / discharge / consumption), `EVCC_ENABLE`
-off by default, idempotent commands, and a `docs/evcc.md` whose snippet is
+The same contract holds for all three bridges (go-mtec2mqtt,
+go-zendure2mqtt): the `evcc` item group, evcc's units and signs (power
+positive = import / production / discharge / consumption; `energy` the
+imported / produced / discharged / charged meter reading, `returnenergy`
+the exported or charged one where a meter has it), `EVCC_ENABLE` off by
+default, idempotent commands, and a `docs/evcc.md` whose snippet is
 checked against the topics the bridge really publishes
 (`internal/evcc/docs_test.go`). Devices with several roles nest them one
 level deeper (`evcc/grid/power`, `evcc/battery/soc`); a wallbox has one role
