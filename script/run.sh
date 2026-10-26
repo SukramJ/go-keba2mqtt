@@ -46,6 +46,30 @@ else
   export KEBA_MQTT_SERVER="core-mosquitto"
   export KEBA_MQTT_PORT="1883"
 fi
+
+# --- MQTT TLS ---
+# mqtt_tls switches to tls:// for an explicit mqtt_server; the auto-detected
+# Home Assistant MQTT service turns it on by itself when it reports ssl.
+# mqtt_tls_ca / mqtt_tls_insecure apply to either broker. A CA file belongs in
+# /ssl or /share (both mapped read-only). Setting both is refused by the
+# daemon's config validation, so it is not second-guessed here.
+if bashio::config.true 'mqtt_tls'; then
+  export KEBA_MQTT_TLS=true
+elif ! bashio::config.has_value 'mqtt_server' \
+  && bashio::services.available 'mqtt' \
+  && [[ "$(bashio::services 'mqtt' 'ssl')" == "true" ]]; then
+  bashio::log.info "The Home Assistant MQTT service reports TLS; connecting via tls://."
+  export KEBA_MQTT_TLS=true
+fi
+if bashio::config.true 'mqtt_tls_insecure'; then
+  bashio::log.warning "mqtt_tls_insecure is on: the broker certificate is NOT verified. Prefer mqtt_tls_ca."
+  export KEBA_MQTT_TLS_INSECURE=true
+fi
+if bashio::config.has_value 'mqtt_tls_ca'; then
+  KEBA_MQTT_TLS_CA="$(bashio::config 'mqtt_tls_ca')"
+  export KEBA_MQTT_TLS_CA
+fi
+
 KEBA_MQTT_TOPIC="$(bashio::config 'mqtt_topic')"
 export KEBA_MQTT_TOPIC
 
@@ -83,6 +107,6 @@ KEBA_WEB_ENABLE="$(bashio::config 'web_enable')"
 export KEBA_WEB_ENABLE
 export KEBA_WEB_BIND="0.0.0.0:8080"
 
-bashio::log.info "Configuration prepared; MQTT server: ${KEBA_MQTT_SERVER}:${KEBA_MQTT_PORT}, wallbox: ${KEBA_MODBUS_IP}:${KEBA_MODBUS_PORT}"
+bashio::log.info "Configuration prepared; MQTT server: ${KEBA_MQTT_SERVER}:${KEBA_MQTT_PORT} (TLS: ${KEBA_MQTT_TLS:-false}), wallbox: ${KEBA_MODBUS_IP}:${KEBA_MODBUS_PORT}"
 
 exec /usr/bin/keba2mqtt

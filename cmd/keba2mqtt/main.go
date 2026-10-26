@@ -15,7 +15,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -94,6 +93,24 @@ func run(configPath string, logger *slog.Logger, level *slog.LevelVar) error {
 	if cfg.Debug {
 		level.Set(slog.LevelDebug)
 	}
+	// TLS is opt-in via MQTT_TLS. Built at start-up so an unusable
+	// MQTT_TLS_CA stops the daemon with the file named instead of failing
+	// every handshake in the reconnect loop. Verification is only off when
+	// the operator explicitly set MQTT_TLS_INSECURE.
+	tlsConfig, err := cfg.MQTTTLSConfig()
+	if err != nil {
+		return err
+	}
+	if cfg.MQTTTLS && cfg.MQTTTLSInsecure {
+		logger.Warn("keba2mqtt.mqtt_tls_insecure",
+			slog.String("effect", "broker certificate NOT verified; anyone on the path can impersonate the broker"),
+			slog.String("action", "set MQTT_TLS_CA to your broker's CA instead"))
+	}
+	for _, key := range cfg.IgnoredTLSKeys() {
+		logger.Warn("keba2mqtt.config_key_ignored",
+			slog.String("key", key),
+			slog.String("reason", "has no effect while MQTT_TLS is false"))
+	}
 	if layout := hass.NewLayout(cfg.MQTTTopic); !layout.Conformant() {
 		logger.Warn("keba2mqtt.mqtt_topic_multi_level",
 			slog.String("mqtt_topic", cfg.MQTTTopic),
@@ -134,10 +151,6 @@ func run(configPath string, logger *slog.Logger, level *slog.LevelVar) error {
 	}
 
 	// --- mqtt ---
-	var tlsConfig *tls.Config
-	if cfg.MQTTSSL {
-		tlsConfig = mqtt.NewClientTLSConfig(cfg.MQTTServer, cfg.MQTTSSLInsecure)
-	}
 	mqttClient := mqtt.NewTCPClient(mqtt.TCPConfig{
 		BrokerURL:  cfg.MQTTBrokerURL(),
 		ClientID:   clientIDBase + strings.ReplaceAll(cfg.MQTTTopic, "/", "-"),

@@ -132,7 +132,8 @@ can be overridden by `KEBA_<KEY>`.
 | `MODBUS_TIMEOUT` | `5` | seconds per request |
 | `MODBUS_READ_INTERVAL` / `MODBUS_WRITE_INTERVAL` | `500` ms / `5` s | request pacing required by the P40 |
 | `MQTT_SERVER` | — | broker (**required**) |
-| `MQTT_PORT`, `MQTT_LOGIN`, `MQTT_PASSWORD`, `MQTT_SSL`, `MQTT_SSL_INSECURE` | `1883` | broker connection; TLS opt-in |
+| `MQTT_PORT`, `MQTT_LOGIN`, `MQTT_PASSWORD` | `1883` (`8883` with `MQTT_TLS`) | broker connection |
+| `MQTT_TLS`, `MQTT_TLS_CA`, `MQTT_TLS_INSECURE` | `false`, `""`, `false` | TLS opt-in; private CA (PEM); skip verification (dangerous, not with `MQTT_TLS_CA`) |
 | `MQTT_TOPIC` | `keba` | instance name; one per wallbox |
 | `MQTT_MAINTENANCE` / `MQTT_STATS_INTERVAL` | `true` / `60` | mqtt-smarthome maintenance topics |
 | `HASS_ENABLE`, `HASS_BASE_TOPIC`, `HASS_BIRTH_GRACETIME` | `false`, `homeassistant`, `15` | discovery |
@@ -144,6 +145,14 @@ can be overridden by `KEBA_<KEY>`.
 | `WEB_ENABLE`, `WEB_BIND`, `WEB_USER`, `WEB_PASSWORD` | `false`, `127.0.0.1:8080` | diagnostic web UI |
 | `LANGUAGE` | `en` | `en` or `de` |
 | `DEBUG` | `false` | verbose logging |
+
+`MQTT_TLS_CA` is verified at start: a missing or unusable file stops the
+daemon with the file named. `MQTT_TLS_CA` / `MQTT_TLS_INSECURE` without
+`MQTT_TLS` have no effect and are warned about. `MQTT_SSL` /
+`MQTT_SSL_INSECURE` (up to 0.2.0) were renamed to `MQTT_TLS` /
+`MQTT_TLS_INSECURE`; a configuration that still sets an old key — in the
+file or as `KEBA_MQTT_SSL*` — is refused at start, because silently
+ignoring `MQTT_SSL: true` would fall back to plain TCP.
 
 ## MQTT topics
 

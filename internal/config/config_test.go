@@ -52,14 +52,14 @@ func TestDefaultsFollowTheSpec(t *testing.T) {
 
 func TestTLSDefaultPort(t *testing.T) {
 	t.Parallel()
-	c, err := Load(strings.NewReader(minimumYAML+"MQTT_SSL: true\n"), nil)
+	c, err := Load(strings.NewReader(minimumYAML+"MQTT_TLS: true\n"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if c.MQTTPort != 8883 || c.MQTTBrokerURL() != "tls://localhost" {
 		t.Errorf("TLS: port %d url %q", c.MQTTPort, c.MQTTBrokerURL())
 	}
-	c, err = Load(strings.NewReader(minimumYAML+"MQTT_SSL: true\nMQTT_PORT: 8884\n"), nil)
+	c, err = Load(strings.NewReader(minimumYAML+"MQTT_TLS: true\nMQTT_PORT: 8884\n"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
