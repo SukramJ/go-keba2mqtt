@@ -201,7 +201,7 @@ internal/hass/        topic schema + Home Assistant discovery document (go-hamqt
 internal/coordinator/ boot, poll scheduler, write queue, evcc commands, keepalive, availability
 internal/config/      YAML + KEBA_* env + validation
 internal/state/       live value cache for the web UI
-internal/web/         diagnostic web UI (embedded, no build step)
+internal/web/         web UI: adapter to the shared go-bridgeui dashboard
 ```
 
 Tests run the coordinator end to end against a simulated P40

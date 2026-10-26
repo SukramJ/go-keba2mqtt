@@ -235,6 +235,7 @@ func run(configPath string, logger *slog.Logger, level *slog.LevelVar) error {
 		Bind:     cfg.WebBind,
 		User:     cfg.WebUser,
 		Password: cfg.WebPassword,
+		Language: cfg.Language,
 		Logger:   logger,
 	}, c)
 	g, gctx := errgroup.WithContext(ctx)

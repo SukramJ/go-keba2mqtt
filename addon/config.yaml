@@ -3,7 +3,7 @@
 # version MUST equal the published image tag (ghcr.io/sukramj/go-keba2mqtt-addon-{arch})
 # and is bumped in the release commit that cuts the matching git tag.
 name: go-keba2mqtt
-version: "0.1.0"
+version: "0.2.0"
 slug: go-keba2mqtt
 description: >-
   Bridges a KEBA KeContact P40 / P40 Pro wallbox to MQTT over Modbus TCP,
