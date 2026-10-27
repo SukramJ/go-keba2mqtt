@@ -1,4 +1,4 @@
-# Unreleased
+# Version 0.4.0 (2026-10-27)
 
 ## What's Changed
 
