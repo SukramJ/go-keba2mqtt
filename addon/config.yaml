@@ -31,7 +31,7 @@ init: false
 ingress: true
 ingress_port: 8080
 panel_icon: mdi:ev-station
-panel_title: go-keba2mqtt
+panel_title: KEBA
 
 # Optional host-port exposure (disabled by default — `null` publishes no port,
 # Ingress stays the primary path).
