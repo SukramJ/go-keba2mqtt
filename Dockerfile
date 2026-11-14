@@ -10,7 +10,7 @@
 # and the annotated config template and nothing else.
 
 # ---------- Stage 1: build ----------
-FROM golang:1.27.3-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 WORKDIR /src
 
 # Cache go.mod / go.sum separately so unrelated source edits don't
