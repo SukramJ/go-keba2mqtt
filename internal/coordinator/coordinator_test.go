@@ -17,9 +17,9 @@ import (
 	"github.com/SukramJ/go-hamqtt/discovery"
 	"github.com/SukramJ/go-hamqtt/publisher"
 	hagomqtt "github.com/SukramJ/go-hamqtt/publisher/gomqtt"
+	"github.com/SukramJ/go-mqtt"
 	"sukramj.dev/go-modbus"
 	"sukramj.dev/go-modbus/modbustest"
-	"github.com/SukramJ/go-mqtt"
 
 	"github.com/SukramJ/go-keba2mqtt/internal/config"
 	"github.com/SukramJ/go-keba2mqtt/internal/hass"
