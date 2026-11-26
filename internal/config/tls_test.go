@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SukramJ/go-mqtt"
+	"sukramj.dev/go-mqtt"
 )
 
 // writeCA writes a freshly generated self-signed CA certificate as PEM

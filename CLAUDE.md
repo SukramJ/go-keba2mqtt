@@ -31,9 +31,9 @@ transport with go-mtec2mqtt through `sukramj.dev/go-modbus`.
   daemon and the `keba-util` CLI. Also a distroless Docker image, a Home
   Assistant add-on (`addon/`) and a systemd installer (`script/install.sh`).
 - **Dependencies are deliberately minimal**: `sukramj.dev/go-modbus`
-  (Modbus-TCP client), `github.com/SukramJ/go-mqtt` (MQTT 5 client),
-  `github.com/SukramJ/go-hamqtt` (discovery model + publisher runtime),
-  `github.com/SukramJ/go-ha-catalog` (HA vocabulary),
+  (Modbus-TCP client), `sukramj.dev/go-mqtt` (MQTT 5 client),
+  `sukramj.dev/go-hamqtt` (discovery model + publisher runtime),
+  `sukramj.dev/go-ha-catalog` (HA vocabulary),
   `github.com/SukramJ/go-bridgeui` (the shared web dashboard), `golang.org/x/sync`,
   `gopkg.in/yaml.v3`. All SukramJ modules are pinned to exact versions.
 - **Config**: YAML (`config-template.yaml` is the annotated reference),
