@@ -21,7 +21,7 @@ const (
 	DefaultUnitID = 255
 )
 
-// Transport is the subset of *modbus.Client (github.com/SukramJ/go-modbus)
+// Transport is the subset of *modbus.Client (sukramj.dev/go-modbus)
 // the device drives.
 type Transport interface {
 	Connect(ctx context.Context) error

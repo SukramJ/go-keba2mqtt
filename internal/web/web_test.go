@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/SukramJ/go-bridgeui"
-	gomodbus "github.com/SukramJ/go-modbus"
+	gomodbus "sukramj.dev/go-modbus"
 
 	"github.com/SukramJ/go-keba2mqtt/internal/coordinator"
 	"github.com/SukramJ/go-keba2mqtt/internal/keba"

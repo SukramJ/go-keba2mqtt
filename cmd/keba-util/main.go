@@ -30,7 +30,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/SukramJ/go-modbus"
+	"sukramj.dev/go-modbus"
 
 	"github.com/SukramJ/go-keba2mqtt/internal/config"
 	"github.com/SukramJ/go-keba2mqtt/internal/keba"
