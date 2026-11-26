@@ -2,7 +2,7 @@
 // Copyright (C) 2026 SukramJ
 
 // Package hass renders this bridge's topic schema and its Home Assistant
-// MQTT discovery document through github.com/SukramJ/go-hamqtt.
+// MQTT discovery document through sukramj.dev/go-hamqtt.
 //
 // The package owns no I/O. It answers two questions, each in one place:
 //
@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
-	hacatalog "github.com/SukramJ/go-ha-catalog"
-	"github.com/SukramJ/go-hamqtt/discovery"
-	hamodel "github.com/SukramJ/go-hamqtt/model"
-	"github.com/SukramJ/go-hamqtt/publisher"
-	"github.com/SukramJ/go-hamqtt/topic"
+	hacatalog "sukramj.dev/go-ha-catalog"
+	"sukramj.dev/go-hamqtt/discovery"
+	hamodel "sukramj.dev/go-hamqtt/model"
+	"sukramj.dev/go-hamqtt/publisher"
+	"sukramj.dev/go-hamqtt/topic"
 
 	"github.com/SukramJ/go-keba2mqtt/internal/keba"
 )

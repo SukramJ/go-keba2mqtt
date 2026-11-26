@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SukramJ/go-mqtt"
+	"sukramj.dev/go-mqtt"
 )
 
 // Daemon-wide constants.
