@@ -14,7 +14,7 @@ writes commands back.
 
 It is a sibling of `go-mtec2mqtt` (whose architecture, tooling and
 conventions it adopts) and `go-zendure2mqtt`, and it shares its Modbus
-transport with go-mtec2mqtt through `github.com/SukramJ/go-modbus`.
+transport with go-mtec2mqtt through `sukramj.dev/go-modbus`.
 
 ## Key Characteristics
 
@@ -30,7 +30,7 @@ transport with go-mtec2mqtt through `github.com/SukramJ/go-modbus`.
 - **Deployment**: two static binaries (`CGO_ENABLED=0`): the `keba2mqtt`
   daemon and the `keba-util` CLI. Also a distroless Docker image, a Home
   Assistant add-on (`addon/`) and a systemd installer (`script/install.sh`).
-- **Dependencies are deliberately minimal**: `github.com/SukramJ/go-modbus`
+- **Dependencies are deliberately minimal**: `sukramj.dev/go-modbus`
   (Modbus-TCP client), `github.com/SukramJ/go-mqtt` (MQTT 5 client),
   `github.com/SukramJ/go-hamqtt` (discovery model + publisher runtime),
   `github.com/SukramJ/go-ha-catalog` (HA vocabulary),

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SukramJ/go-modbus"
-	"github.com/SukramJ/go-modbus/modbustest"
+	"sukramj.dev/go-modbus"
+	"sukramj.dev/go-modbus/modbustest"
 )
 
 // Spec examples, verbatim, through the catalog's own items.

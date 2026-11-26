@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SukramJ/go-modbus/modbustest"
+	"sukramj.dev/go-modbus/modbustest"
 
 	"github.com/SukramJ/go-keba2mqtt/internal/keba"
 )
